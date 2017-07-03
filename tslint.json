@@ -1,0 +1,14 @@
+{
+    "extends": [
+        "tslint-config-airbnb"
+    ],
+    "rules": {
+        "class-methods-use-this": "off",
+        "import-name": false,
+        "no-param-reassign": "off",
+        "variable-name": [
+            true,
+            "allow-leading-underscore"
+        ]
+    }
+}
