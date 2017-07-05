@@ -1,5 +1,5 @@
 /* global window */
-import Entity from './Entity';
+import Entity from './entities/Entity';
 import {
   NULL_VECTOR,
 } from './vectors';
@@ -67,7 +67,7 @@ export default class Controls {
     this.keyboardListener = this.keyboardListener.bind(this);
   }
 
-  setEntity(entity) {
+  setEntity(entity: Entity) {
     if (this.entity) throw new Error('Entity already set for Controls');
     this.entity = entity;
     window.addEventListener('keydown', this.keyboardListener);

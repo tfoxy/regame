@@ -1,21 +1,19 @@
 import {
   Vector,
-} from './vectors';
+} from '../vectors';
+import Entity from './Entity';
 
-export default class Entity {
-  position: Vector;
+export default class Player extends Entity {
   angle: number;
   radius: number;
   speed: Vector;
-  maxSpeedModule: number;
   _canvas: HTMLCanvasElement;
   color: string;
 
   constructor() {
-    this.position = { x: NaN, y: NaN };
+    super();
     this.angle = 0;
     this.radius = 20;
-    this.speed = { x: 0, y: 0 };
     this.maxSpeedModule = 250;
     this.color = 'green';
   }
@@ -23,11 +21,6 @@ export default class Entity {
   setPosition(x, y) {
     this.position.x = x;
     this.position.y = y;
-  }
-
-  setMovementDirection(x, y) {
-    this.speed.x = x * this.maxSpeedModule;
-    this.speed.y = y * this.maxSpeedModule;
   }
 
   get canvas() {
