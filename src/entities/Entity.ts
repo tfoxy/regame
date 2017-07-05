@@ -1,3 +1,4 @@
+import { Circle as SatCircle, Polygon as SatPolygon } from 'sat';
 import {
   Vector,
 } from '../vectors';
@@ -10,6 +11,7 @@ export default abstract class Entity {
   maxSpeedModule: number;
   focusPoint: Vector;
   canvas: HTMLCanvasElement;
+  sat: SatCircle | SatPolygon;
 
   constructor() {
     this.position = { x: NaN, y: NaN };

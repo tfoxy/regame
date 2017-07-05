@@ -19,25 +19,17 @@ export default class Renderer {
     this.render();
   }
 
-  get width() {
-    return this.canvas.width;
-  }
-
-  get height() {
-    return this.canvas.height;
-  }
-
   render() {
-    this.canvasContext.clearRect(0, 0, this.width, this.height);
+    this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.game.entities.forEach(this.drawEntity, this);
     window.requestAnimationFrame(this.render);
   }
 
   drawEntity(entity: Entity) {
-    const { canvas, position: pos, angle } = entity;
+    const { canvas, position, angle } = entity;
     const ctx = this.canvasContext;
     const { width: gameWidth, height: gameHeight } = this.game.map;
-    const { x: xPos, y: yPos } = pos;
+    const { x: xPos, y: yPos } = position;
     ctx.translate(xPos, yPos);
     ctx.rotate(angle);
     ctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);

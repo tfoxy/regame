@@ -1,5 +1,5 @@
+import { Polygon as SatPolygon, Vector as SatVector } from 'sat';
 import {
-  NULL_VECTOR,
   Vector,
 } from '../vectors';
 import Entity from './Entity';
@@ -26,6 +26,10 @@ export default class Player extends Entity {
     this.size.x = this.maxX - this.minX;
     this.size.y = this.maxY - this.minY;
     this.points = points;
+    this.sat = new SatPolygon(
+      new SatVector(),
+      points.map(p => new SatVector(p.x, p.y)),
+    );
   }
 
   get canvas() {

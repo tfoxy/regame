@@ -1,3 +1,4 @@
+import { Circle as SatCircle, Vector as SatVector } from 'sat';
 import {
   Vector,
 } from '../vectors';
@@ -11,11 +12,12 @@ export default class Player extends Entity {
 
   constructor() {
     super();
-    this.radius = 20;
+    this.radius = 10;
     this.maxSpeedModule = 250;
     this.color = 'green';
     this.size.x = this.radius;
     this.size.y = this.radius;
+    this.sat = new SatCircle(new SatVector(this.position.x, this.position.y), this.radius);
   }
 
   private setAngleByFocusPoint() {
@@ -28,6 +30,8 @@ export default class Player extends Entity {
 
   setPosition(x, y) {
     super.setPosition(x, y);
+    this.sat.pos.x = x;
+    this.sat.pos.y = y;
     this.setAngleByFocusPoint();
   }
 

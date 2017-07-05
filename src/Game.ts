@@ -1,7 +1,11 @@
+import { Response as SatResponse, testPolygonCircle } from 'sat';
+
 import Entity from './entities/Entity';
 import Player from './entities/Player';
 import Wall from './entities/Wall';
 import GameMap from './GameMap';
+
+const satResponse = new SatResponse();
 
 export default class Game {
   map: GameMap;
@@ -26,11 +30,11 @@ export default class Game {
     this.loop();
   }
 
-  loadMap() {
+  private loadMap() {
     this.entities.push(...this.map.walls.map(points => new Wall(points)));
   }
 
-  startRound() {
+  private startRound() {
     const player = new Player();
     const spawnPoint = this.map.spawnPoints[0];
     player.setPosition(spawnPoint.x, spawnPoint.y);
@@ -38,12 +42,16 @@ export default class Game {
     this.player = player;
   }
 
-  loop() {
-    this.entities.forEach(this.moveEntity, this);
+  private loop() {
+    this.entities.forEach(this.loopEntity, this);
     setTimeout(this.loop, this.loopInterval);
   }
 
-  moveEntity(entity: Entity) {
+  private loopEntity(entity: Entity) {
+    this.moveEntity(entity);
+  }
+
+  private moveEntity(entity: Entity) {
     const { speed } = entity;
     if (speed.x || speed.y) {
       const pos = entity.position;
@@ -54,6 +62,28 @@ export default class Game {
       y = Math.max(y, entity.size.y);
       y = Math.min(y, this.map.height - entity.size.y);
       entity.setPosition(x, y);
+      this.checkEntityCollisions(entity);
     }
+  }
+
+  private checkEntityCollisions(entity: Entity) {
+    let colliding = false;
+    let counter = 0;
+    do {
+      counter += 1;
+      colliding = this.entities.some((e) => {
+        if (e === entity) return;
+        const colliding =
+          testPolygonCircle(e.sat, entity.sat, satResponse) && Boolean(satResponse.overlap);
+        if (colliding) {
+          entity.setPosition(
+            entity.position.x + satResponse.overlapV.x,
+            entity.position.y + satResponse.overlapV.y,
+          );
+        }
+        satResponse.clear();
+        return colliding;
+      });
+    } while (colliding && counter < 10);
   }
 }
