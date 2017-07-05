@@ -34,14 +34,14 @@ export default class Renderer {
   }
 
   drawEntity(entity: Entity) {
-    const { canvas, position: pos } = entity;
+    const { canvas, position: pos, angle } = entity;
     const ctx = this.canvasContext;
     const { width: gameWidth, height: gameHeight } = this.game.map;
     const { x: xPos, y: yPos } = pos;
-    // ctx.translate(xPos, yPos);
-    // ctx.rotate(angle);
-    ctx.drawImage(canvas, xPos - (canvas.width / 2), yPos - (canvas.height / 2));
-    // ctx.rotate(-angle);
-    // ctx.translate(-xPos, -yPos);
+    ctx.translate(xPos, yPos);
+    ctx.rotate(angle);
+    ctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+    ctx.rotate(-angle);
+    ctx.translate(-xPos, -yPos);
   }
 }

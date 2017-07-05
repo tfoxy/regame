@@ -42,10 +42,10 @@ export interface KeyBindings {
 }
 
 const DEFAULT_KEY_BINDINGS = {
-  FORWARD: 'ArrowUp',
-  BACKWARD: 'ArrowDown',
-  LEFT: 'ArrowLeft',
-  RIGHT: 'ArrowRight',
+  FORWARD: 'w',
+  BACKWARD: 's',
+  LEFT: 'a',
+  RIGHT: 'd',
 };
 
 export default class Controls {
@@ -65,6 +65,7 @@ export default class Controls {
     this.currentKeys = [];
     this.currentKeySet = new Set();
     this.keyboardListener = this.keyboardListener.bind(this);
+    this.mouseListener = this.mouseListener.bind(this);
   }
 
   setEntity(entity: Entity) {
@@ -74,7 +75,11 @@ export default class Controls {
     window.addEventListener('keyup', this.keyboardListener);
   }
 
-  keyboardListener(keyboardEvent) {
+  setCanvas(canvas: HTMLCanvasElement) {
+    canvas.addEventListener('mousemove', this.mouseListener);
+  }
+
+  keyboardListener(keyboardEvent: KeyboardEvent) {
     const { key, type } = keyboardEvent;
     if (type === 'keydown' && !this.currentKeySet.has(key)) {
       this.currentKeys.push(key);
@@ -84,6 +89,13 @@ export default class Controls {
       this.currentKeys.splice(index, 1);
     }
     this.updateCurrentDirection();
+  }
+
+  mouseListener(mouseEvent: MouseEvent) {
+    const type = mouseEvent.type;
+    if (type === 'mousemove') {
+      this.entity.setFocusPoint(mouseEvent.offsetX, mouseEvent.offsetY);
+    }
   }
 
   updateCurrentDirection() {

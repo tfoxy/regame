@@ -14,5 +14,6 @@ controls.setEntity(game.player);
 
 const renderer = new Renderer();
 renderer.start(game);
+controls.setCanvas(renderer.canvas);
 
 document.body.appendChild(renderer.canvas);

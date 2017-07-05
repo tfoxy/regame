@@ -36,8 +36,8 @@ export default class Player extends Entity {
       canvas.height = this.size.y;
       const ctx = canvas.getContext('2d');
       ctx.beginPath();
-      ctx.moveTo(this.points[0].x - this.minX, this.points[0].y - this.minX);
-      this.points.forEach(p => ctx.lineTo(p.x - this.minX, p.y - this.minX));
+      ctx.moveTo(this.points[0].x - this.minX, this.points[0].y - this.minY);
+      this.points.forEach(p => ctx.lineTo(p.x - this.minX, p.y - this.minY));
       ctx.fillStyle = '#AAA';
       ctx.fill();
       this._canvas = canvas;
