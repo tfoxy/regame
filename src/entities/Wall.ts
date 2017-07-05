@@ -23,7 +23,8 @@ export default class Player extends Entity {
     this.maxY = Math.max(...yPoints);
     this.position.x = (this.maxX + this.minX) / 2;
     this.position.y = (this.maxY + this.minY) / 2;
-    this.size = { x: this.maxX - this.minX, y: this.maxY - this.minY };
+    this.size.x = this.maxX - this.minX;
+    this.size.y = this.maxY - this.minY;
     this.points = points;
   }
 

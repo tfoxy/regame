@@ -16,11 +16,8 @@ export default class Player extends Entity {
     this.radius = 20;
     this.maxSpeedModule = 250;
     this.color = 'green';
-  }
-
-  setPosition(x, y) {
-    this.position.x = x;
-    this.position.y = y;
+    this.size.x = this.radius;
+    this.size.y = this.radius;
   }
 
   get canvas() {

@@ -43,12 +43,16 @@ export default class Game {
     setTimeout(this.loop, this.loopInterval);
   }
 
-  moveEntity(entity) {
+  moveEntity(entity: Entity) {
     const { speed } = entity;
     if (speed.x || speed.y) {
       const pos = entity.position;
-      const x = pos.x + (speed.x / this.tickrate);
-      const y = pos.y + (speed.y / this.tickrate);
+      let x = pos.x + (speed.x / this.tickrate);
+      let y = pos.y + (speed.y / this.tickrate);
+      x = Math.max(x, entity.size.x);
+      x = Math.min(x, this.map.width - entity.size.x);
+      y = Math.max(y, entity.size.y);
+      y = Math.min(y, this.map.height - entity.size.y);
       entity.setPosition(x, y);
     }
   }
