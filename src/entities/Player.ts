@@ -1,14 +1,17 @@
 import { Circle as SatCircle, Vector as SatVector } from 'sat';
 import {
   Vector,
+  angleBetweenTwoVectors,
 } from '../vectors';
 import Entity from './Entity';
+import Fov from '../Fov';
 
 export default class Player extends Entity {
   radius: number;
   speed: Vector;
   _canvas: HTMLCanvasElement;
   color: string;
+  fov: Fov;
 
   constructor() {
     super();
@@ -18,13 +21,12 @@ export default class Player extends Entity {
     this.size.x = this.radius;
     this.size.y = this.radius;
     this.sat = new SatCircle(new SatVector(this.position.x, this.position.y), this.radius);
+    this.fov = new Fov(this);
   }
 
   private setAngleByFocusPoint() {
     if (Number.isNaN(this.focusPoint.x)) return;
-    const dx = this.focusPoint.x - this.position.x;
-    const dy = this.focusPoint.y - this.position.y;
-    const angle = Math.atan2(dy, dx);
+    const angle = angleBetweenTwoVectors(this.position, this.focusPoint);
     this.setAngle(angle);
   }
 
@@ -37,6 +39,7 @@ export default class Player extends Entity {
 
   setAngle(angle: number) {
     this.angle = angle;
+    this.fov.update();
   }
 
   setFocusPoint(x, y) {

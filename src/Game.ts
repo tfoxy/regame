@@ -13,6 +13,7 @@ export default class Game {
   tickrate: number;
   loopInterval: number;
   player: Player;
+  walls: Wall[];
   
   constructor() {
     this.map = new GameMap();
@@ -31,7 +32,8 @@ export default class Game {
   }
 
   private loadMap() {
-    this.entities.push(...this.map.walls.map(points => new Wall(points)));
+    this.walls = this.map.walls.map(points => new Wall(points));
+    this.entities.push(...this.walls);
   }
 
   private startRound() {
@@ -40,6 +42,8 @@ export default class Game {
     player.setPosition(spawnPoint.x, spawnPoint.y);
     this.entities.push(player);
     this.player = player;
+    this.player.fov.setMap(this.map);
+    this.player.fov.update();
   }
 
   private loop() {
