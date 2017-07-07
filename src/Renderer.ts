@@ -22,8 +22,10 @@ export default class Renderer {
 
   render() {
     this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.drawFov(this.game.player);
-    this.game.entities.forEach(this.drawEntity, this);
+    this.game.walls.forEach(this.drawEntity, this);
+    this.drawFov();
+    // this.drawDebugFov(this.game.player);
+    this.drawEntity(this.game.player);
     window.requestAnimationFrame(this.render);
   }
 
@@ -39,7 +41,41 @@ export default class Renderer {
     ctx.translate(-xPos, -yPos);
   }
 
-  drawFov(player: Player) {
+  drawFov() {
+    const intersects = this.game.player.fov.intersects;
+    const ctx = this.canvasContext;
+    const { globalCompositeOperation, lineWidth, fillStyle } = ctx;
+
+    ctx.beginPath();
+    ctx.moveTo(intersects[0].x,intersects[0].y);
+    for (let i = 1; i < intersects.length; i += 1) {
+      const intersect = intersects[i];
+      ctx.lineTo(intersect.x, intersect.y);
+    }
+    ctx.lineTo(intersects[0].x, intersects[0].y);
+    ctx.lineWidth = 10;
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.stroke();
+
+    ctx.fillStyle = 'black';
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    ctx.beginPath();
+    ctx.moveTo(intersects[0].x,intersects[0].y);
+    for (let i = 1; i < intersects.length; i += 1) {
+      const intersect = intersects[i];
+      ctx.lineTo(intersect.x, intersect.y);
+    }
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fill();
+
+    ctx.globalCompositeOperation = globalCompositeOperation;
+    ctx.lineWidth = lineWidth;
+    ctx.fillStyle = fillStyle;
+  }
+
+  drawDebugFov(player: Player) {
     const intersects = player.fov.intersects;
     const ctx = this.canvasContext;
     ctx.fillStyle = '#dd3838';
@@ -52,9 +88,9 @@ export default class Renderer {
     ctx.fill();
 
     // DRAW DEBUG LINES
-    ctx.strokeStyle = "#f55";
-    for(var i=0;i<intersects.length;i++){
-      var intersect = intersects[i];
+    ctx.strokeStyle = '#f55';
+    for (let i = 0; i < intersects.length; i += 1) {
+      const intersect = intersects[i];
       ctx.beginPath();
       ctx.moveTo(player.position.x,player.position.y);
       ctx.lineTo(intersect.x,intersect.y);
