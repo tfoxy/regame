@@ -5,7 +5,9 @@ import {
   angleBetweenTwoVectors,
 } from './vectors';
 
+const PI2 = 2 * Math.PI;
 const ANGLE_DELTA = 0.00001;
+const VISION_CONE_ANGLE = Math.PI / 4;
 
 // Find intersection of RAY & SEGMENT
 function getIntersection(ray: { a: Vector, b: Vector }, segment: { a: Vector, b: Vector }) {
@@ -64,12 +66,29 @@ export default class Fov {
 
   update() {
     const points = this.map.wallPoints;
-    const angles = [];
-    points.forEach((point) => {
-      const angle = angleBetweenTwoVectors(this.entity.position, point);
-      angles.push(angle - ANGLE_DELTA, angle, angle + ANGLE_DELTA);
+    const minAngle = this.entity.angle - VISION_CONE_ANGLE;
+    const maxAngle = this.entity.angle + VISION_CONE_ANGLE;
+    const oppositeAngle = this.entity.angle + (this.entity.angle < 0 ? Math.PI : -Math.PI);
+
+    const angles = [minAngle, maxAngle];
+    points.forEach((point, i) => {
+      let angle = angleBetweenTwoVectors(this.entity.position, point);
+      if (oppositeAngle > 0 && angle > oppositeAngle) angle -= 2 * Math.PI;
+      else if (oppositeAngle < 0 && angle < oppositeAngle) angle += 2 * Math.PI;
+      if (angle <= maxAngle && angle >= minAngle) {
+        angles.push(angle - ANGLE_DELTA, angle, angle + ANGLE_DELTA);
+      }
     });
-    const intersects = [];
+
+    const intersects: { x: number, y: number, param?: number, angle?: number }[] = [{
+      x: this.entity.position.x,
+      y: this.entity.position.y,
+      angle: minAngle - ANGLE_DELTA,
+    }, {
+      x: this.entity.position.x,
+      y: this.entity.position.y,
+      angle: maxAngle + ANGLE_DELTA,
+    }];
     angles.forEach((angle) => {
       const dx = Math.cos(angle);
       const dy = Math.sin(angle);
