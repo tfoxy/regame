@@ -9,8 +9,18 @@ const PI2 = 2 * Math.PI;
 const ANGLE_DELTA = 0.00001;
 const VISION_CONE_ANGLE = Math.PI / 4;
 
+interface Intersection {
+  x: number;
+  y: number;
+  param?: number;
+  angle?: number;
+}
+
 // Find intersection of RAY & SEGMENT
-function getIntersection(ray: { a: Vector, b: Vector }, segment: { a: Vector, b: Vector }) {
+function getIntersection(
+  ray: { a: Vector, b: Vector },
+  segment: { a: Vector, b: Vector },
+): Intersection {
   // RAY in parametric: Point + Delta*T1
   const rPx = ray.a.x;
   const rPy = ray.a.y;
@@ -65,6 +75,10 @@ export default class Fov {
   }
 
   update() {
+    if (this.entity.isOutOfGame()) {
+      this.intersects = [];
+      return;
+    }
     const points = this.map.wallPoints;
     const minAngle = this.entity.angle - VISION_CONE_ANGLE;
     const maxAngle = this.entity.angle + VISION_CONE_ANGLE;
@@ -80,7 +94,7 @@ export default class Fov {
       }
     });
 
-    const intersects: { x: number, y: number, param?: number, angle?: number }[] = [{
+    const intersects: Intersection[] = [{
       x: this.entity.position.x,
       y: this.entity.position.y,
       angle: minAngle - ANGLE_DELTA,
@@ -99,7 +113,7 @@ export default class Fov {
         b: { x: source.x + dx, y: source.y + dy },
       };
 
-      let closestIntersect: { x: number, y: number, param: number, angle?: number } = null;
+      let closestIntersect: Intersection = null;
       this.map.wallSegments.forEach((segment) => {
         const intersect = getIntersection(ray, segment);
         if (intersect && (!closestIntersect || intersect.param < closestIntersect.param)) {

@@ -12,3 +12,10 @@ export function angleBetweenTwoVectors(source: Vector, destination: Vector) {
   const angle = Math.atan2(dy, dx);
   return angle;
 }
+
+export function polarToCartesian(radius, angle) {
+  return {
+    x: radius * Math.cos(angle),
+    y: radius * Math.sin(angle),
+  };
+}

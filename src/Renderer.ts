@@ -1,7 +1,7 @@
 /* global document, window */
 import Game from './Game';
 import Entity from './entities/Entity';
-import Player from './entities/Player';
+import Soldier from './entities/Soldier';
 
 export default class Renderer {
   game: Game;
@@ -20,16 +20,17 @@ export default class Renderer {
     this.render();
   }
 
-  render() {
+  private render() {
     this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.game.walls.forEach(this.drawEntity, this);
-    this.drawFov();
-    // this.drawDebugFov(this.game.player);
-    this.drawEntity(this.game.player);
+    this.drawMap();
+    this.drawFogOfWar();
+    this.drawSoldiers();
+    this.drawBullets();
     window.requestAnimationFrame(this.render);
   }
 
-  drawEntity(entity: Entity) {
+  private drawEntity(entity: Entity) {
+    if (entity.isOutOfGame()) return;
     const { canvas, position, angle } = entity;
     const ctx = this.canvasContext;
     const { width: gameWidth, height: gameHeight } = this.game.map;
@@ -41,10 +42,35 @@ export default class Renderer {
     ctx.translate(-xPos, -yPos);
   }
 
-  drawFov() {
+  private drawMap() {
+    this.game.walls.forEach(this.drawEntity, this);
+  }
+
+  private drawSoldiers() {
+    const ctx = this.canvasContext;
+    ctx.globalCompositeOperation = 'source-over';
+    // this.drawDebugFov(this.game.player);
+    this.drawEntity(this.game.player);
+    ctx.globalCompositeOperation = 'destination-over';
+    this.game.soldiers.forEach(this.drawEntity, this);
+  }
+
+  private drawBullets() {
+    const ctx = this.canvasContext;
+    ctx.globalCompositeOperation = 'destination-over';
+    this.game.bullets.forEach(this.drawEntity, this);
+  }
+
+  private drawFogOfWar() {
     const intersects = this.game.player.fov.intersects;
     const ctx = this.canvasContext;
-    const { globalCompositeOperation, lineWidth, fillStyle } = ctx;
+
+    if (!intersects.length) {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      return;
+    }
 
     ctx.beginPath();
     ctx.moveTo(intersects[0].x,intersects[0].y);
@@ -69,14 +95,10 @@ export default class Renderer {
     }
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fill();
-
-    ctx.globalCompositeOperation = globalCompositeOperation;
-    ctx.lineWidth = lineWidth;
-    ctx.fillStyle = fillStyle;
   }
 
-  drawDebugFov(player: Player) {
-    const intersects = player.fov.intersects;
+  private drawDebugFov(soldier: Soldier) {
+    const intersects = soldier.fov.intersects;
     const ctx = this.canvasContext;
     ctx.fillStyle = '#dd3838';
     ctx.beginPath();
@@ -92,8 +114,8 @@ export default class Renderer {
     for (let i = 0; i < intersects.length; i += 1) {
       const intersect = intersects[i];
       ctx.beginPath();
-      ctx.moveTo(player.position.x,player.position.y);
-      ctx.lineTo(intersect.x,intersect.y);
+      ctx.moveTo(soldier.position.x, soldier.position.y);
+      ctx.lineTo(intersect.x, intersect.y);
       ctx.stroke();
     }
   }

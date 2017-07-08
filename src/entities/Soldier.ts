@@ -6,22 +6,28 @@ import {
 import Entity from './Entity';
 import Fov from '../Fov';
 
-export default class Player extends Entity {
+export default class Soldier extends Entity {
   radius: number;
   speed: Vector;
-  _canvas: HTMLCanvasElement;
+  focusPoint: Vector;
+  private _canvas: HTMLCanvasElement;
   color: string;
-  fov: Fov;
+  private _fov: Fov;
+  private fovUpdatePending: boolean;
+  shooting: boolean;
 
   constructor() {
     super();
+    this.position = { x: NaN, y: NaN };
+    this.speed = { x: 0, y: 0 };
     this.radius = 10;
     this.maxSpeedModule = 250;
-    this.color = 'green';
-    this.size.x = this.radius;
-    this.size.y = this.radius;
-    this.sat = new SatCircle(new SatVector(this.position.x, this.position.y), this.radius);
-    this.fov = new Fov(this);
+    this.color = 'blue';
+    this.focusPoint = { x: NaN, y: NaN };
+    this.sat = new SatCircle(new SatVector(), this.radius);
+    this._fov = new Fov(this);
+    this.fovUpdatePending = false;
+    this.shooting = false;
   }
 
   private setAngleByFocusPoint() {
@@ -30,22 +36,39 @@ export default class Player extends Entity {
     this.setAngle(angle);
   }
 
-  setPosition(x, y) {
+  setPosition(x: number, y: number) {
     super.setPosition(x, y);
     this.sat.pos.x = x;
     this.sat.pos.y = y;
     this.setAngleByFocusPoint();
+    this.fovUpdatePending = true;
   }
 
   setAngle(angle: number) {
-    this.angle = angle;
-    this.fov.update();
+    super.setAngle(angle);
+    this.fovUpdatePending = true;
   }
 
-  setFocusPoint(x, y) {
+  setFocusPoint(x: number, y: number) {
     this.focusPoint.x = x;
     this.focusPoint.y = y;
     this.setAngleByFocusPoint();
+  }
+
+  startShooting() {
+    this.shooting = true;
+  }
+
+  stopShooting() {
+    this.shooting = false;
+  }
+
+  get fov() {
+    if (this.fovUpdatePending) {
+      this._fov.update();
+      this.fovUpdatePending = false;
+    }
+    return this._fov;
   }
 
   get canvas() {
@@ -53,8 +76,8 @@ export default class Player extends Entity {
     if (!canvas) {
       const { radius, position: pos } = this;
       canvas = document.createElement('canvas');
-      canvas.width = this.radius * 2;
-      canvas.height = this.radius * 2;
+      canvas.width = radius * 2;
+      canvas.height = radius * 2;
       const ctx = canvas.getContext('2d');
       ctx.beginPath();
       ctx.arc(radius, radius, radius, 0, 2 * Math.PI, false);

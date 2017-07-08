@@ -3,7 +3,7 @@ import { Vector } from './vectors';
 export default class GameMap {
   height = 800;
   width = 800;
-  spawnPoints = [{ x: 50, y: 50 }];
+  spawnPoints = [{ x: 50, y: 50, angle: 0 }, { x: 160, y: 50, angle: Math.PI / 2 }];
   walls = [
     [{ x: 400, y: 400 }, { x: 600, y: 400 }, { x: 500, y: 450 }],
     [{ x: 100, y: 0 }, { x: 120, y: 0 }, { x: 120, y: 200 }, { x: 100, y: 200 }],
@@ -17,13 +17,26 @@ export default class GameMap {
     const p2 = { x: this.width, y: 0 };
     const p3 = { x: this.width, y: this.height };
     const p4 = { x: 0, y: this.height };
+    this.walls.push(
+      [p1, p2],
+      [p2, p3],
+      [p3, p4],
+      [p4, p1],
+    );
 
-    this.wallPoints = [p1, p2, p3, p4];
+    const wallPointSet = new Set();
+    this.wallPoints = [];
     this.walls.forEach((aWallPoints) => {
-      this.wallPoints.push(...aWallPoints);
+      aWallPoints.forEach((p) => {
+        const hash = `${p.x},${p.y}`;
+        if (!wallPointSet.has(hash)) {
+          wallPointSet.add(hash);
+          this.wallPoints.push(p);
+        }
+      });
     });
 
-    this.wallSegments = [{ a: p1, b: p2 }, { a: p2, b: p3 }, { a: p3, b: p4 }, { a: p4, b: p1 }];
+    this.wallSegments = [];
     this.walls.forEach((aWallPoints) => {
       for (let i = 1; i < aWallPoints.length; i += 1) {
         this.wallSegments.push({ a: aWallPoints[i - 1], b: aWallPoints[i] });

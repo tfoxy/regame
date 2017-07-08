@@ -1,5 +1,5 @@
 /* global window */
-import Entity from './entities/Entity';
+import Soldier from './entities/Soldier';
 import {
   NULL_VECTOR,
 } from './vectors';
@@ -55,28 +55,30 @@ export default class Controls {
     LEFT,
     RIGHT,
   };
-  entity: Entity;
+  soldier: Soldier;
   currentKeys: string[];
   currentKeySet: Set<string>;
 
   constructor(keyBindings = DEFAULT_KEY_BINDINGS) {
     this.keyBindings = keyBindings;
-    this.entity = null;
+    this.soldier = null;
     this.currentKeys = [];
     this.currentKeySet = new Set();
     this.keyboardListener = this.keyboardListener.bind(this);
     this.mouseListener = this.mouseListener.bind(this);
   }
 
-  setEntity(entity: Entity) {
-    if (this.entity) throw new Error('Entity already set for Controls');
-    this.entity = entity;
+  setSoldier(soldier: Soldier) {
+    if (this.soldier) throw new Error('Soldier already set for Controls');
+    this.soldier = soldier;
     window.addEventListener('keydown', this.keyboardListener);
     window.addEventListener('keyup', this.keyboardListener);
   }
 
   setCanvas(canvas: HTMLCanvasElement) {
     canvas.addEventListener('mousemove', this.mouseListener);
+    canvas.addEventListener('mousedown', this.mouseListener);
+    canvas.addEventListener('mouseup', this.mouseListener);
   }
 
   keyboardListener(keyboardEvent: KeyboardEvent) {
@@ -94,7 +96,11 @@ export default class Controls {
   mouseListener(mouseEvent: MouseEvent) {
     const type = mouseEvent.type;
     if (type === 'mousemove') {
-      this.entity.setFocusPoint(mouseEvent.offsetX, mouseEvent.offsetY);
+      this.soldier.setFocusPoint(mouseEvent.offsetX, mouseEvent.offsetY);
+    } else if (type === 'mousedown') {
+      this.soldier.startShooting();
+    } else if (type === 'mouseup') {
+      this.soldier.stopShooting();
     }
   }
 
@@ -117,6 +123,6 @@ export default class Controls {
       }
     });
     const direction = MOVE_MAP[moveY + moveX];
-    this.entity.setMovementDirection(direction.x, direction.y);
+    this.soldier.setMovementDirection(direction.x, direction.y);
   }
 }

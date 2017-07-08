@@ -10,7 +10,7 @@ const game = new Game();
 game.start();
 
 const controls = new Controls();
-controls.setEntity(game.player);
+controls.setSoldier(game.player);
 
 const renderer = new Renderer();
 renderer.start(game);
