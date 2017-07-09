@@ -75,10 +75,10 @@ export default class Controls {
     window.addEventListener('keyup', this.keyboardListener);
   }
 
-  setCanvas(canvas: HTMLCanvasElement) {
-    canvas.addEventListener('mousemove', this.mouseListener);
-    canvas.addEventListener('mousedown', this.mouseListener);
-    canvas.addEventListener('mouseup', this.mouseListener);
+  setMouseTrackerElement(element: HTMLElement) {
+    element.addEventListener('mousemove', this.mouseListener);
+    element.addEventListener('mousedown', this.mouseListener);
+    element.addEventListener('mouseup', this.mouseListener);
   }
 
   keyboardListener(keyboardEvent: KeyboardEvent) {

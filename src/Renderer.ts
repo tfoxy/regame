@@ -8,8 +8,8 @@ import CanvasFactory from './CanvasFactory';
 export default class Renderer {
   game: Game;
   canvas: HTMLCanvasElement;
-  canvasContext: CanvasRenderingContext2D;
-  canvasFactory: CanvasFactory;
+  private canvasContext: CanvasRenderingContext2D;
+  private canvasFactory: CanvasFactory;
 
   start(game: Game) {
     if (this.game) throw new Error('Renderer is already rendering a Game');

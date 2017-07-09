@@ -1,19 +1,8 @@
 /* global document */
 
-import Game from './Game';
-import Renderer from './Renderer';
-import Controls from './Controls';
-
+import GameUi from './GameUi';
 import './index.css';
 
-const game = new Game();
-game.start();
-
-const controls = new Controls();
-controls.setSoldier(game.player);
-
-const renderer = new Renderer();
-renderer.start(game);
-controls.setCanvas(renderer.canvas);
-
-document.body.appendChild(renderer.canvas);
+const ui = new GameUi();
+ui.startGame();
+document.body.appendChild(ui.rootElement);

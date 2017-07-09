@@ -1,3 +1,4 @@
+import { EventEmitter2 } from 'eventemitter2';
 import Soldier from './entities/Soldier';
 
 export default class Team {
@@ -6,6 +7,7 @@ export default class Team {
   soldiers: Soldier[];
   kills: number;
   deaths: number;
+  events: EventEmitter2;
 
   constructor(color) {
     this.name = color;
@@ -13,6 +15,7 @@ export default class Team {
     this.soldiers = [];
     this.kills = 0;
     this.deaths = 0;
+    this.events = new EventEmitter2();
   }
 
   addSoldier(soldier: Soldier) {
@@ -24,9 +27,11 @@ export default class Team {
     const index = this.soldiers.indexOf(soldier);
     if (index >= 0) this.soldiers.splice(index, 1);
     this.deaths += 1;
+    this.events.emit('death');
   }
 
   addKill() {
     this.kills += 1;
+    this.events.emit('kill');
   }
 }

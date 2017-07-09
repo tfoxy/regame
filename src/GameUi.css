@@ -1,0 +1,11 @@
+.GameUi {
+  background: #E0E0E0;
+  margin: auto;
+  position: relative;
+}
+
+.GameUi-teamListStats {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}

@@ -1,4 +1,5 @@
 import { Response as SatResponse, testCircleCircle, testPolygonCircle } from 'sat';
+import { EventEmitter2 } from 'eventemitter2';
 
 import Entity from './entities/Entity';
 import Soldier from './entities/Soldier';
@@ -19,7 +20,8 @@ export default class Game {
   soldiers: Soldier[];
   bullets: Bullet[];
   teams: Team[];
-  
+  events: EventEmitter2;
+
   constructor() {
     this.map = new GameMap();
     this.entities = [];
@@ -29,6 +31,7 @@ export default class Game {
     this.soldiers = [];
     this.bullets = [];
     this.teams = [];
+    this.events = new EventEmitter2();
   }
 
   start() {

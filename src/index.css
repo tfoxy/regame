@@ -7,8 +7,5 @@ body {
   height: 100%;
   width: 100%;
   display: flex;
-}
-canvas {
-  background: #E0E0E0;
-  margin: auto;
+  font-family: sans-serif;
 }
