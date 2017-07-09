@@ -5,6 +5,7 @@ import Soldier from './entities/Soldier';
 import Bullet from './entities/Bullet';
 import Wall from './entities/Wall';
 import GameMap from './GameMap';
+import Team from './Team';
 
 const satResponse = new SatResponse();
 
@@ -17,6 +18,7 @@ export default class Game {
   walls: Wall[];
   soldiers: Soldier[];
   bullets: Bullet[];
+  teams: Team[];
   
   constructor() {
     this.map = new GameMap();
@@ -26,11 +28,13 @@ export default class Game {
     this.player = null;
     this.soldiers = [];
     this.bullets = [];
+    this.teams = [];
   }
 
   start() {
     if (this.loop !== Game.prototype.loop) throw new Error('Game already started');
     this.loadMap();
+    this.createTeams();
     this.startRound();
     this.loop = this.loop.bind(this);
     this.loop();
@@ -41,15 +45,19 @@ export default class Game {
     this.entities.push(...this.walls);
   }
 
-  private startRound() {
-    const soldier = this.addSoldier(this.map.spawnPoints[0]);
-    this.player = soldier;
-    const secondSoldier = this.addSoldier(this.map.spawnPoints[1]);
-    secondSoldier.color = 'red';
+  private createTeams() {
+    this.teams.push(new Team('blue'), new Team('red'));
   }
 
-  private addSoldier(spawnPoint: { x: number, y: number, angle: number }) {
+  private startRound() {
+    const soldier = this.addSoldier(this.map.spawnPoints[0], this.teams[0]);
+    this.player = soldier;
+    const secondSoldier = this.addSoldier(this.map.spawnPoints[1], this.teams[1]);
+  }
+
+  private addSoldier(spawnPoint: { x: number, y: number, angle: number }, team: Team) {
     const soldier = new Soldier();
+    team.addSoldier(soldier);
     soldier.fov.setMap(this.map);
     soldier.setPosition(spawnPoint.x, spawnPoint.y);
     soldier.setAngle(spawnPoint.angle);
@@ -128,7 +136,10 @@ export default class Game {
     if (collisionSoldier) {
       this.removeEntity(bullet, this.bullets);
       this.removeEntity(collisionSoldier, this.soldiers);
-      return;
+      collisionSoldier.team.addSoldierDeath(collisionSoldier);
+      if (bullet.soldier.team !== collisionSoldier.team) {
+        bullet.soldier.team.addKill();
+      }
     }
   }
 

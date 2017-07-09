@@ -31,21 +31,4 @@ export default class Wall extends Entity {
       points.map(p => new SatVector(p.x, p.y)),
     );
   }
-
-  get canvas() {
-    let canvas = this._canvas;
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.width = this.maxX - this.minX;
-      canvas.height = this.maxY - this.minY;
-      const ctx = canvas.getContext('2d');
-      ctx.beginPath();
-      ctx.moveTo(this.points[0].x - this.minX, this.points[0].y - this.minY);
-      this.points.forEach(p => ctx.lineTo(p.x - this.minX, p.y - this.minY));
-      ctx.fillStyle = '#AAA';
-      ctx.fill();
-      this._canvas = canvas;
-    }
-    return this._canvas;
-  }
 }

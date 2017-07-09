@@ -10,7 +10,6 @@ export default abstract class Entity {
   size: Vector;
   speed: Vector;
   maxSpeedModule: number;
-  canvas: HTMLCanvasElement;
   sat: SatCircle | SatPolygon;
 
   constructor() {

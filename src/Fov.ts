@@ -7,7 +7,7 @@ import {
 
 const PI2 = 2 * Math.PI;
 const ANGLE_DELTA = 0.00001;
-const VISION_CONE_ANGLE = Math.PI / 4;
+const VISION_CONE_ANGLE = Math.PI * 0.35;
 
 interface Intersection {
   x: number;

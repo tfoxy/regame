@@ -2,11 +2,14 @@
 import Game from './Game';
 import Entity from './entities/Entity';
 import Soldier from './entities/Soldier';
+import Bullet from './entities/Bullet';
+import CanvasFactory from './CanvasFactory';
 
 export default class Renderer {
   game: Game;
   canvas: HTMLCanvasElement;
   canvasContext: CanvasRenderingContext2D;
+  canvasFactory: CanvasFactory;
 
   start(game: Game) {
     if (this.game) throw new Error('Renderer is already rendering a Game');
@@ -16,6 +19,7 @@ export default class Renderer {
     canvas.height = this.game.map.height;
     this.canvas = canvas;
     this.canvasContext = canvas.getContext('2d');
+    this.canvasFactory = new CanvasFactory();
     this.render = this.render.bind(this);
     this.render();
   }
@@ -29,9 +33,40 @@ export default class Renderer {
     window.requestAnimationFrame(this.render);
   }
 
-  private drawEntity(entity: Entity) {
-    if (entity.isOutOfGame()) return;
-    const { canvas, position, angle } = entity;
+  private drawMap() {
+    const mapCanvas = this.canvasFactory.getGameMapCanvas(this.game.map);
+    this.canvasContext.drawImage(mapCanvas, 0, 0);
+  }
+
+  private drawSoldiers() {
+    const ctx = this.canvasContext;
+    ctx.globalCompositeOperation = 'source-over';
+    // this.drawDebugFov(this.game.player);
+    this.drawSoldier(this.game.player);
+    ctx.globalCompositeOperation = 'destination-over';
+    this.game.soldiers.forEach(this.drawSoldier, this);
+  }
+
+  private drawSoldier(soldier: Soldier) {
+    if (soldier.isOutOfGame()) return;
+    const canvas = this.canvasFactory.getSoldierCanvas(soldier);
+    this.drawEntity(soldier, canvas);
+  }
+
+  private drawBullets() {
+    const ctx = this.canvasContext;
+    ctx.globalCompositeOperation = 'destination-over';
+    this.game.bullets.forEach(this.drawBullet, this);
+  }
+
+  private drawBullet(bullet: Bullet) {
+    if (bullet.isOutOfGame()) return;
+    const canvas = this.canvasFactory.getBulletCanvas(bullet);
+    this.drawEntity(bullet, canvas);
+  }
+
+  private drawEntity(entity: Entity, canvas: HTMLCanvasElement) {
+    const { position, angle } = entity;
     const ctx = this.canvasContext;
     const { width: gameWidth, height: gameHeight } = this.game.map;
     const { x: xPos, y: yPos } = position;
@@ -40,25 +75,6 @@ export default class Renderer {
     ctx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
     ctx.rotate(-angle);
     ctx.translate(-xPos, -yPos);
-  }
-
-  private drawMap() {
-    this.game.walls.forEach(this.drawEntity, this);
-  }
-
-  private drawSoldiers() {
-    const ctx = this.canvasContext;
-    ctx.globalCompositeOperation = 'source-over';
-    // this.drawDebugFov(this.game.player);
-    this.drawEntity(this.game.player);
-    ctx.globalCompositeOperation = 'destination-over';
-    this.game.soldiers.forEach(this.drawEntity, this);
-  }
-
-  private drawBullets() {
-    const ctx = this.canvasContext;
-    ctx.globalCompositeOperation = 'destination-over';
-    this.game.bullets.forEach(this.drawEntity, this);
   }
 
   private drawFogOfWar() {
