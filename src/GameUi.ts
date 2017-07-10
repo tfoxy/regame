@@ -1,6 +1,7 @@
 import Game from './Game';
 import Renderer from './Renderer';
 import Controls from './Controls';
+import Team from './Team';
 
 import './GameUi.css';
 
@@ -20,6 +21,7 @@ export default class GameUi {
   game: Game;
   controls: Controls;
   renderer: Renderer;
+  playerTeam: Team;
 
   constructor() {
     this.rootElement = document.createElement('div');
@@ -34,8 +36,12 @@ export default class GameUi {
     this.renderer = new Renderer();
 
     this.game.start();
-    this.controls.setSoldier(this.game.player);
+    this.playerTeam = this.game.teams[0];
+    this.controls.setSoldier(this.playerTeam.player);
     this.controls.setMouseTrackerElement(this.rootElement);
+    this.game.events.addListener('roundStarted', () => {
+      this.controls.setSoldier(this.playerTeam.player);
+    });
     this.renderer.start(this.game);
 
     this.render();

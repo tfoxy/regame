@@ -4,7 +4,8 @@ import Soldier from './entities/Soldier';
 export default class Team {
   name: string;
   color: string;
-  soldiers: Soldier[];
+  activeSoldiers: Soldier[];
+  allSoldiers: Soldier[];
   kills: number;
   deaths: number;
   events: EventEmitter2;
@@ -12,20 +13,30 @@ export default class Team {
   constructor(color) {
     this.name = color;
     this.color = color;
-    this.soldiers = [];
+    this.activeSoldiers = [];
+    this.allSoldiers = [];
     this.kills = 0;
     this.deaths = 0;
     this.events = new EventEmitter2();
   }
 
+  get player() {
+    return this.activeSoldiers[this.activeSoldiers.length - 1] || null;
+  }
+
+  activateSoldiers() {
+    this.activeSoldiers.length = 0;
+    this.activeSoldiers.push(...this.allSoldiers);
+  }
+
   addSoldier(soldier: Soldier) {
     soldier.setTeam(this);
-    this.soldiers.push(soldier);
+    this.allSoldiers.push(soldier);
   }
 
   addSoldierDeath(soldier: Soldier) {
-    const index = this.soldiers.indexOf(soldier);
-    if (index >= 0) this.soldiers.splice(index, 1);
+    const index = this.activeSoldiers.indexOf(soldier);
+    if (index >= 0) this.activeSoldiers.splice(index, 1);
     this.deaths += 1;
     this.events.emit('death');
   }

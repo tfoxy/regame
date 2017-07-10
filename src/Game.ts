@@ -10,12 +10,20 @@ import Team from './Team';
 
 const satResponse = new SatResponse();
 
+const TEAM_COLORS = [
+  'blue',
+  'red',
+  'green',
+  'orange',
+  'cyan',
+  'purple',
+];
+
 export default class Game {
   map: GameMap;
   entities: Entity[];
   tickrate: number;
   loopInterval: number;
-  player: Soldier;
   walls: Wall[];
   soldiers: Soldier[];
   bullets: Bullet[];
@@ -27,7 +35,6 @@ export default class Game {
     this.entities = [];
     this.tickrate = 128;
     this.loopInterval = 1000 / this.tickrate;
-    this.player = null;
     this.soldiers = [];
     this.bullets = [];
     this.teams = [];
@@ -49,23 +56,35 @@ export default class Game {
   }
 
   private createTeams() {
-    this.teams.push(new Team('blue'), new Team('red'));
+    this.teams.push(...this.map.spawnPoints.map((p, i) => new Team(TEAM_COLORS[i])));
   }
 
   private startRound() {
-    const soldier = this.addSoldier(this.map.spawnPoints[0], this.teams[0]);
-    this.player = soldier;
-    const secondSoldier = this.addSoldier(this.map.spawnPoints[1], this.teams[1]);
+    this.entities.length = 0;
+    this.soldiers.length = 0;
+    this.bullets.length = 0;
+    this.map.spawnPoints.forEach((spawnPoint, index) => {
+      this.addSoldier(this.teams[index]);
+    });
+    this.teams.forEach((team, i) => {
+      const spawnPoint = this.map.spawnPoints[i];
+      team.activateSoldiers();
+      team.activeSoldiers.forEach((soldier) => {
+        soldier.setPosition(spawnPoint.x, spawnPoint.y);
+        soldier.setAngle(spawnPoint.angle);
+        soldier.setMovementDirection(0, 0);
+        soldier.stopShooting();
+        this.entities.push(soldier);
+        this.soldiers.push(soldier);
+      });
+    });
+    this.events.emit('roundStarted');
   }
 
-  private addSoldier(spawnPoint: { x: number, y: number, angle: number }, team: Team) {
+  private addSoldier(team: Team) {
     const soldier = new Soldier();
     team.addSoldier(soldier);
     soldier.fov.setMap(this.map);
-    soldier.setPosition(spawnPoint.x, spawnPoint.y);
-    soldier.setAngle(spawnPoint.angle);
-    this.entities.push(soldier);
-    this.soldiers.push(soldier);
     return soldier;
   }
 
@@ -142,6 +161,9 @@ export default class Game {
       collisionSoldier.team.addSoldierDeath(collisionSoldier);
       if (bullet.soldier.team !== collisionSoldier.team) {
         bullet.soldier.team.addKill();
+      }
+      if (this.teams.some(team => team.activeSoldiers.length === 0)) {
+        this.startRound();
       }
     }
   }

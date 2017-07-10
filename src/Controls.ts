@@ -69,10 +69,11 @@ export default class Controls {
   }
 
   setSoldier(soldier: Soldier) {
-    if (this.soldier) throw new Error('Soldier already set for Controls');
+    if (!this.soldier) {
+      window.addEventListener('keydown', this.keyboardListener);
+      window.addEventListener('keyup', this.keyboardListener);
+    }
     this.soldier = soldier;
-    window.addEventListener('keydown', this.keyboardListener);
-    window.addEventListener('keyup', this.keyboardListener);
   }
 
   setMouseTrackerElement(element: HTMLElement) {
