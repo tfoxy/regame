@@ -29,6 +29,8 @@ export default class Game {
   bullets: Bullet[];
   teams: Team[];
   events: EventEmitter2;
+  frameNumber: number;
+  restartRoundFlag: boolean;
 
   constructor() {
     this.map = new GameMap();
@@ -39,6 +41,7 @@ export default class Game {
     this.bullets = [];
     this.teams = [];
     this.events = new EventEmitter2();
+    this.restartRoundFlag = false;
   }
 
   start() {
@@ -57,12 +60,19 @@ export default class Game {
 
   private createTeams() {
     this.teams.push(...this.map.spawnPoints.map((p, i) => new Team(TEAM_COLORS[i])));
+    this.teams.forEach(t => t.setGame(this));
   }
 
   private startRound() {
     this.entities.length = 0;
     this.soldiers.length = 0;
     this.bullets.length = 0;
+    this.teams.forEach((team) => {
+      team.activeSoldiers.forEach((soldier) => {
+        soldier.setMovementDirection(0, 0);
+        soldier.stopShooting();
+      });
+    });
     this.map.spawnPoints.forEach((spawnPoint, index) => {
       this.addSoldier(this.teams[index]);
     });
@@ -72,12 +82,11 @@ export default class Game {
       team.activeSoldiers.forEach((soldier) => {
         soldier.setPosition(spawnPoint.x, spawnPoint.y);
         soldier.setAngle(spawnPoint.angle);
-        soldier.setMovementDirection(0, 0);
-        soldier.stopShooting();
         this.entities.push(soldier);
         this.soldiers.push(soldier);
       });
     });
+    this.frameNumber = 0;
     this.events.emit('roundStarted');
   }
 
@@ -97,8 +106,13 @@ export default class Game {
   }
 
   private loop() {
+    if (this.restartRoundFlag) {
+      this.restartRoundFlag = false;
+      this.startRound();
+    }
     this.soldiers.forEach(this.loopSoldier, this);
     this.bullets.forEach(this.loopBullet, this);
+    this.frameNumber += 1;
     setTimeout(this.loop, this.loopInterval);
   }
 
@@ -114,6 +128,7 @@ export default class Game {
   }
 
   private loopSoldier(soldier: Soldier) {
+    soldier.executeSavedAction(this.frameNumber);
     if (soldier.speed.x || soldier.speed.y) {
       this.moveEntity(soldier);
       this.checkSoldierCollisions(soldier);
@@ -156,6 +171,8 @@ export default class Game {
       soldier => testCircleCircle(soldier.sat, bullet.sat),
     );
     if (collisionSoldier) {
+      collisionSoldier.setMovementDirection(0, 0);
+      collisionSoldier.stopShooting();
       this.removeEntity(bullet, this.bullets);
       this.removeEntity(collisionSoldier, this.soldiers);
       collisionSoldier.team.addSoldierDeath(collisionSoldier);
@@ -163,7 +180,7 @@ export default class Game {
         bullet.soldier.team.addKill();
       }
       if (this.teams.some(team => team.activeSoldiers.length === 0)) {
-        this.startRound();
+        this.restartRoundFlag = true;
       }
     }
   }

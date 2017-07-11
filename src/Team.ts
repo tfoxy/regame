@@ -1,5 +1,6 @@
 import { EventEmitter2 } from 'eventemitter2';
 import Soldier from './entities/Soldier';
+import Game from './Game';
 
 export default class Team {
   name: string;
@@ -9,6 +10,7 @@ export default class Team {
   kills: number;
   deaths: number;
   events: EventEmitter2;
+  game: Game;
 
   constructor(color) {
     this.name = color;
@@ -18,6 +20,10 @@ export default class Team {
     this.kills = 0;
     this.deaths = 0;
     this.events = new EventEmitter2();
+  }
+
+  setGame(game) {
+    this.game = game;
   }
 
   get player() {
