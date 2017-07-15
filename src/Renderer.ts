@@ -13,13 +13,21 @@ export default class Renderer {
   private canvasFactory: CanvasFactory;
   povTeam: Team;
 
-  start(game: Game) {
+  setGame(game: Game) {
     if (this.game) throw new Error('Renderer is already rendering a Game');
     this.game = game;
-    const canvas = document.createElement('canvas');
+    if (this.canvas) this.startRender();
+  }
+
+  setCanvas(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
+    if (this.game) this.startRender();
+  }
+
+  private startRender() {
+    const canvas = this.canvas;
     canvas.width = this.game.map.width;
     canvas.height = this.game.map.height;
-    this.canvas = canvas;
     this.canvasContext = canvas.getContext('2d');
     this.canvasFactory = new CanvasFactory();
     this.povTeam = this.game.teams[0];

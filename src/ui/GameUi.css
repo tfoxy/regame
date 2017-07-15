@@ -1,7 +1,8 @@
 .GameUi {
   background: #E0E0E0;
-  margin: auto;
   position: relative;
+  user-select: none;
+  cursor: default;
 }
 
 .GameUi-teamListStats {

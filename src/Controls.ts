@@ -76,7 +76,7 @@ export default class Controls {
     this.soldier = soldier;
   }
 
-  setMouseTrackerElement(element: HTMLElement) {
+  setMouseTrackerElement(element: Element) {
     element.addEventListener('mousemove', this.mouseListener);
     element.addEventListener('mousedown', this.mouseListener);
     element.addEventListener('mouseup', this.mouseListener);
