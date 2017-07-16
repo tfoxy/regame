@@ -2,7 +2,7 @@ import { Component, h } from 'preact';
 
 import Game from '../Game';
 import Renderer from '../Renderer';
-import Controls from '../Controls';
+import LocalControls from '../LocalControls';
 import Team from '../Team';
 import TeamStats from './TeamStats';
 
@@ -11,6 +11,7 @@ import './GameUi.css';
 
 interface Props {
   game: Game;
+  localControls?: LocalControls;
 }
 
 interface State {
@@ -19,35 +20,24 @@ interface State {
 
 
 export default class GameUi extends Component<Props, State> {
-  controls: Controls;
   renderer: Renderer;
   rootElement: Element;
   canvasElement: HTMLCanvasElement;
 
   constructor(props) {
     super(props);
-    this.startGame();
-  }
-
-  startGame() {
-    const game = this.props.game;
-    this.controls = new Controls();
     this.renderer = new Renderer();
-
-    game.start();
-    const playerTeam = game.teams[0];
-    this.controls.setSoldier(playerTeam.player);
-    game.events.addListener('roundStarted', () => {
-      this.controls.setSoldier(playerTeam.player);
-    });
-    this.renderer.setGame(game);
-
-    this.state.playerTeam = playerTeam;
+    this.renderer.setGame(this.props.game);
+    if (this.props.localControls) {
+      this.renderer.setPovTeam(this.props.localControls.team);
+    }
   }
 
   componentDidMount() {
-    this.controls.setMouseTrackerElement(this.rootElement);
     this.renderer.setCanvas(this.canvasElement);
+    if (this.props.localControls) {
+      this.props.localControls.setMouseTrackerElement(this.rootElement);
+    }
   }
 
   render() {

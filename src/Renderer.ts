@@ -24,13 +24,16 @@ export default class Renderer {
     if (this.game) this.startRender();
   }
 
+  setPovTeam(team: Team) {
+    this.povTeam = team;
+  }
+
   private startRender() {
     const canvas = this.canvas;
     canvas.width = this.game.map.width;
     canvas.height = this.game.map.height;
     this.canvasContext = canvas.getContext('2d');
     this.canvasFactory = new CanvasFactory();
-    this.povTeam = this.game.teams[0];
     this.render = this.render.bind(this);
     this.render();
   }
@@ -52,9 +55,11 @@ export default class Renderer {
   private drawSoldiers() {
     const ctx = this.canvasContext;
     ctx.globalCompositeOperation = 'source-over';
-    // this.drawDebugFov(this.povTeam.player);
-    this.povTeam.activeSoldiers.forEach(this.drawSoldier, this);
-    ctx.globalCompositeOperation = 'destination-over';
+    if (this.povTeam) {
+      // this.drawDebugFov(this.povTeam.player);
+      this.povTeam.activeSoldiers.forEach(this.drawSoldier, this);
+      ctx.globalCompositeOperation = 'destination-over';
+    }
     this.game.soldiers.forEach(this.drawSoldier, this);
   }
 
@@ -89,6 +94,7 @@ export default class Renderer {
   }
 
   private drawFogOfWar() {
+    if (!this.povTeam) return;
     const ctx = this.canvasContext;
     const activeSoldiers = this.povTeam.activeSoldiers;
 

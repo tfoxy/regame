@@ -60,7 +60,7 @@ export default class Soldier extends Entity {
     if (team.player !== this) return;
     const game = team.game;
     if (!game) return;
-    const frameNumber = game.frameNumber;
+    const frameNumber = game.roundFrameNumber;
     this.actionsByFrameNumber.set(frameNumber, {
       movementDirection: { x: this.movementDirection.x, y: this.movementDirection.y },
       focusPoint: { x: this.focusPoint.x, y: this.focusPoint.y },
@@ -70,7 +70,6 @@ export default class Soldier extends Entity {
 
   executeSavedAction(frameNumber: number) {
     const action = this.actionsByFrameNumber.get(frameNumber);
-    // console.log(this.actionsByFrameNumber, frameNumber, action);ssssssssssssssss
     if (action) {
       this.setMovementDirection(action.movementDirection.x, action.movementDirection.y);
       this.setFocusPoint(action.focusPoint.x, action.focusPoint.y);

@@ -1,6 +1,7 @@
 import { EventEmitter2 } from 'eventemitter2';
 import Soldier from './entities/Soldier';
 import Game from './Game';
+import ActionsQueue from './ActionsQueue';
 
 export default class Team {
   name: string;
@@ -11,6 +12,7 @@ export default class Team {
   deaths: number;
   events: EventEmitter2;
   game: Game;
+  actionsQueue: ActionsQueue;
 
   constructor(color) {
     this.name = color;
@@ -19,6 +21,7 @@ export default class Team {
     this.allSoldiers = [];
     this.kills = 0;
     this.deaths = 0;
+    this.actionsQueue = new ActionsQueue(this);
     this.events = new EventEmitter2();
   }
 
@@ -27,7 +30,7 @@ export default class Team {
   }
 
   get player() {
-    return this.activeSoldiers[this.activeSoldiers.length - 1] || null;
+    return this.allSoldiers[this.allSoldiers.length - 1] || null;
   }
 
   activateSoldiers() {

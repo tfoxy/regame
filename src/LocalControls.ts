@@ -1,5 +1,6 @@
 /* global window */
-import Soldier from './entities/Soldier';
+import Team from './Team';
+import ConnectionManager from './ConnectionManager';
 import {
   NULL_VECTOR,
 } from './vectors';
@@ -48,32 +49,40 @@ const DEFAULT_KEY_BINDINGS = {
   RIGHT: 'd',
 };
 
-export default class Controls {
+export default class LocalControls {
   keyBindings: {
     FORWARD,
     BACKWARD,
     LEFT,
     RIGHT,
   };
-  soldier: Soldier;
+  team: Team;
   currentKeys: string[];
   currentKeySet: Set<string>;
+  currentDirection: string;
+  connectionManager: ConnectionManager;
 
   constructor(keyBindings = DEFAULT_KEY_BINDINGS) {
     this.keyBindings = keyBindings;
-    this.soldier = null;
     this.currentKeys = [];
     this.currentKeySet = new Set();
     this.keyboardListener = this.keyboardListener.bind(this);
     this.mouseListener = this.mouseListener.bind(this);
   }
 
-  setSoldier(soldier: Soldier) {
-    if (!this.soldier) {
+  setTeam(team: Team) {
+    if (!this.team) {
       window.addEventListener('keydown', this.keyboardListener);
       window.addEventListener('keyup', this.keyboardListener);
+      team.game.events.addListener('loopStart', () => {
+        this.team.actionsQueue.delayAction(null);
+      });
     }
-    this.soldier = soldier;
+    this.team = team;
+  }
+
+  setConnectionManager(connectionManager: ConnectionManager) {
+    this.connectionManager = connectionManager;
   }
 
   setMouseTrackerElement(element: Element) {
@@ -82,7 +91,7 @@ export default class Controls {
     element.addEventListener('mouseup', this.mouseListener);
   }
 
-  keyboardListener(keyboardEvent: KeyboardEvent) {
+  private keyboardListener(keyboardEvent: KeyboardEvent) {
     const { key, type } = keyboardEvent;
     if (type === 'keydown' && !this.currentKeySet.has(key)) {
       this.currentKeys.push(key);
@@ -94,18 +103,27 @@ export default class Controls {
     this.updateCurrentDirection();
   }
 
-  mouseListener(mouseEvent: MouseEvent) {
+  private mouseListener(mouseEvent: MouseEvent) {
     const type = mouseEvent.type;
     if (type === 'mousemove') {
-      this.soldier.setFocusPoint(mouseEvent.offsetX, mouseEvent.offsetY);
+      this.team.actionsQueue.delayAction({
+        name: 'setFocusPoint',
+        args: [mouseEvent.offsetX, mouseEvent.offsetY],
+      });
     } else if (type === 'mousedown') {
-      this.soldier.startShooting();
+      this.team.actionsQueue.delayAction({
+        name: 'startShooting',
+        args: null,
+      });
     } else if (type === 'mouseup') {
-      this.soldier.stopShooting();
+      this.team.actionsQueue.delayAction({
+        name: 'stopShooting',
+        args: null,
+      });
     }
   }
 
-  updateCurrentDirection() {
+  private updateCurrentDirection() {
     const {
       FORWARD: forwardKey,
       BACKWARD: backwardKey,
@@ -124,6 +142,11 @@ export default class Controls {
       }
     });
     const direction = MOVE_MAP[moveY + moveX];
-    this.soldier.setMovementDirection(direction.x, direction.y);
+    if (this.currentDirection === direction) return;
+    this.currentDirection = direction;
+    this.team.actionsQueue.delayAction({
+      name: 'setMovementDirection',
+      args: [direction.x, direction.y],
+    });
   }
 }

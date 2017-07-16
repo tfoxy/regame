@@ -14,6 +14,7 @@
   "devDependencies": {
     "@types/chai": "^4.0.1",
     "@types/mocha": "^2.2.41",
+    "@types/webrtc": "^0.0.21",
     "chai": "^4.0.1",
     "clean-webpack-plugin": "^0.1.16",
     "css-loader": "^0.28.4",

@@ -31,6 +31,8 @@ export default class Game {
   events: EventEmitter2;
   frameNumber: number;
   restartRoundFlag: boolean;
+  round: number;
+  roundFrameNumber: number;
 
   constructor() {
     this.map = new GameMap();
@@ -48,9 +50,11 @@ export default class Game {
     if (this.loop !== Game.prototype.loop) throw new Error('Game already started');
     this.loadMap();
     this.createTeams();
+    this.round = 0;
+    this.frameNumber = 0;
     this.startRound();
     this.loop = this.loop.bind(this);
-    this.loop();
+    setTimeout(this.loop, this.loopInterval);
   }
 
   private loadMap() {
@@ -67,12 +71,6 @@ export default class Game {
     this.entities.length = 0;
     this.soldiers.length = 0;
     this.bullets.length = 0;
-    this.teams.forEach((team) => {
-      team.activeSoldiers.forEach((soldier) => {
-        soldier.setMovementDirection(0, 0);
-        soldier.stopShooting();
-      });
-    });
     this.map.spawnPoints.forEach((spawnPoint, index) => {
       this.addSoldier(this.teams[index]);
     });
@@ -82,12 +80,15 @@ export default class Game {
       team.activeSoldiers.forEach((soldier) => {
         soldier.setPosition(spawnPoint.x, spawnPoint.y);
         soldier.setAngle(spawnPoint.angle);
+        soldier.setMovementDirection(0, 0);
+        soldier.stopShooting();
         this.entities.push(soldier);
         this.soldiers.push(soldier);
       });
     });
-    this.frameNumber = 0;
-    this.events.emit('roundStarted');
+    this.roundFrameNumber = 0;
+    this.round += 1;
+    this.events.emit('roundStart');
   }
 
   private addSoldier(team: Team) {
@@ -106,13 +107,18 @@ export default class Game {
   }
 
   private loop() {
-    if (this.restartRoundFlag) {
-      this.restartRoundFlag = false;
-      this.startRound();
+    if (this.teams.every(t => t.actionsQueue.hasNext())) {
+      this.events.emit('loopStart');
+      this.teams.forEach(t => t.actionsQueue.executeActions());
+      this.soldiers.forEach(this.loopSoldier, this);
+      this.bullets.forEach(this.loopBullet, this);
+      this.frameNumber += 1;
+      this.roundFrameNumber += 1;
+      if (this.restartRoundFlag) {
+        this.restartRoundFlag = false;
+        this.startRound();
+      }
     }
-    this.soldiers.forEach(this.loopSoldier, this);
-    this.bullets.forEach(this.loopBullet, this);
-    this.frameNumber += 1;
     setTimeout(this.loop, this.loopInterval);
   }
 
@@ -128,7 +134,7 @@ export default class Game {
   }
 
   private loopSoldier(soldier: Soldier) {
-    soldier.executeSavedAction(this.frameNumber);
+    soldier.executeSavedAction(this.roundFrameNumber);
     if (soldier.speed.x || soldier.speed.y) {
       this.moveEntity(soldier);
       this.checkSoldierCollisions(soldier);
