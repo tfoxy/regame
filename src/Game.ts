@@ -11,7 +11,7 @@ import Team from './Team';
 const satResponse = new SatResponse();
 
 const TEAM_COLORS = [
-  'blue',
+  'royalblue',
   'red',
   'green',
   'orange',

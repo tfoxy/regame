@@ -21,7 +21,7 @@ export default class CanvasFactory {
       const ctx = canvas.getContext('2d');
       ctx.beginPath();
       ctx.arc(radius, radius, radius, 0, 2 * Math.PI, false);
-      ctx.fillStyle = 'orange';
+      ctx.fillStyle = 'darkorange';
       ctx.fill();
       this.bulletCanvas = canvas;
     }
@@ -49,7 +49,8 @@ export default class CanvasFactory {
 
   getSoldierCanvas(soldier: Soldier) {
     const color = soldier.team.color;
-    const hash = color;
+    const isPlayer = soldier.team.player === soldier;
+    const hash = `${color}-${isPlayer}`;
     let canvas = this.soldierCanvasMap.get(hash);
     if (!canvas) {
       const radius = soldier.radius;
@@ -61,6 +62,13 @@ export default class CanvasFactory {
       ctx.arc(radius, radius, radius, 0, 2 * Math.PI, false);
       ctx.fillStyle = color;
       ctx.fill();
+      if (isPlayer) {
+        ctx.beginPath();
+        ctx.arc(radius, radius, radius - 5, 0, 2 * Math.PI, false);
+        ctx.strokeStyle = 'yellow';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
       ctx.beginPath();
       ctx.moveTo(radius * 2, radius);
       ctx.lineTo(radius, radius);
