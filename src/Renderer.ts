@@ -54,12 +54,19 @@ export default class Renderer {
 
   private drawSoldiers() {
     const ctx = this.canvasContext;
-    ctx.globalCompositeOperation = 'source-over';
     if (this.povTeam) {
       // this.drawDebugFov(this.povTeam.player);
+      ctx.globalCompositeOperation = 'source-over';
       this.povTeam.activeSoldiers.forEach(this.drawSoldier, this);
       ctx.globalCompositeOperation = 'destination-over';
+      ctx.globalAlpha = 0.1;
+      ctx.lineWidth = 1;
+      ctx.fillStyle = this.povTeam.color;
+      ctx.strokeStyle = this.povTeam.color;
+      this.povTeam.activeSoldiers.forEach(this.drawFov, this);
+      ctx.globalAlpha = 1;
     }
+    ctx.globalCompositeOperation = 'destination-over';
     this.game.soldiers.forEach(this.drawSoldier, this);
   }
 
@@ -149,6 +156,7 @@ export default class Renderer {
     ctx.fill();
 
     // DRAW DEBUG LINES
+    ctx.lineWidth = 1;
     ctx.strokeStyle = '#f55';
     for (let i = 0; i < intersects.length; i += 1) {
       const intersect = intersects[i];
@@ -157,5 +165,18 @@ export default class Renderer {
       ctx.lineTo(intersect.x, intersect.y);
       ctx.stroke();
     }
+  }
+
+  private drawFov(soldier: Soldier) {
+    const intersects = soldier.fov.intersects;
+    const ctx = this.canvasContext;
+    ctx.beginPath();
+    ctx.moveTo(intersects[0].x,intersects[0].y);
+    for (let i = 1; i < intersects.length; i += 1) {
+      const intersect = intersects[i];
+      ctx.lineTo(intersect.x, intersect.y);
+    }
+    ctx.stroke();
+    ctx.fill();
   }
 }
