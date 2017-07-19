@@ -68,6 +68,13 @@ export default class Game {
   }
 
   private startRound() {
+    this.teams.forEach((team) => {
+      team.activeSoldiers.forEach((soldier) => {
+        soldier.setFiring(false);
+      });
+    });
+    this.roundFrameNumber = 0;
+    this.round += 1;
     this.entities.length = 0;
     this.soldiers.length = 0;
     this.bullets.length = 0;
@@ -81,13 +88,11 @@ export default class Game {
         soldier.setPosition(spawnPoint.x, spawnPoint.y);
         soldier.setAngle(spawnPoint.angle);
         soldier.setMovementDirection(0, 0);
-        soldier.stopShooting();
+        soldier.weapon.reset();
         this.entities.push(soldier);
         this.soldiers.push(soldier);
       });
     });
-    this.roundFrameNumber = 0;
-    this.round += 1;
     this.events.emit('roundStart');
   }
 
@@ -178,7 +183,8 @@ export default class Game {
     );
     if (collisionSoldier) {
       collisionSoldier.setMovementDirection(0, 0);
-      collisionSoldier.stopShooting();
+      collisionSoldier.setFiring(false);
+      collisionSoldier.weapon.reset();
       this.removeEntity(bullet, this.bullets);
       this.removeEntity(collisionSoldier, this.soldiers);
       collisionSoldier.team.addSoldierDeath(collisionSoldier);
@@ -192,7 +198,8 @@ export default class Game {
   }
 
   private makeShot(soldier: Soldier) {
-    if (!soldier.shooting) return;
+    soldier.weapon.finishReload(this.roundFrameNumber);
+    if (!soldier.weapon.shoot(this.roundFrameNumber)) return;
     const bullet = new Bullet();
     bullet.fireFromSoldier(soldier);
     this.bullets.push(bullet);

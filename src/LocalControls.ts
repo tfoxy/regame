@@ -112,13 +112,13 @@ export default class LocalControls {
       });
     } else if (type === 'mousedown') {
       this.team.actionsQueue.delayAction({
-        name: 'startShooting',
-        args: null,
+        name: 'setFiring',
+        args: [true],
       });
     } else if (type === 'mouseup') {
       this.team.actionsQueue.delayAction({
-        name: 'stopShooting',
-        args: null,
+        name: 'setFiring',
+        args: [false],
       });
     }
   }

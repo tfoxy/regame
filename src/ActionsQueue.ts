@@ -8,7 +8,7 @@ export interface Action {
 
 export default class ActionsQueue {
   team: Team;
-  delay = 8;
+  delay = 8;  // tickrate / 16
   private queue: Action[][];
 
   constructor(team: Team) {
