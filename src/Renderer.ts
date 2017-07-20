@@ -9,6 +9,19 @@ import Team from './Team';
 const shotSoundUrl = require<string>('./assets/sounds/shot.mp3');
 const reloadSoundUrl = require<string>('./assets/sounds/reload.mp3');
 
+const audioFiles = [
+  shotSoundUrl,
+  reloadSoundUrl,
+];
+
+audioFiles.forEach(preloadAudio);
+    
+function preloadAudio(url) {
+  const audio = new Audio();
+  // audio.addEventListener('canplaythrough', loadedAudio, false);
+  audio.src = url;
+}
+
 export default class Renderer {
   game: Game;
   canvas: HTMLCanvasElement;
