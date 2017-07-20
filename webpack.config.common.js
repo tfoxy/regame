@@ -11,6 +11,9 @@ module.exports = {
     rules: [{
       test: /.tsx?$/,
       use: 'ts-loader',
+    }, {
+      test: /.mp3$/,
+      use: ['file-loader'],
     }],
   },
   plugins: [

@@ -6,12 +6,17 @@ import Bullet from './entities/Bullet';
 import CanvasFactory from './CanvasFactory';
 import Team from './Team';
 
+const shotSoundUrl = require<string>('./assets/sounds/shot.mp3');
+const reloadSoundUrl = require<string>('./assets/sounds/reload.mp3');
+
 export default class Renderer {
   game: Game;
   canvas: HTMLCanvasElement;
   private canvasContext: CanvasRenderingContext2D;
   private canvasFactory: CanvasFactory;
   povTeam: Team;
+  private lastRenderedFrame: number;
+  private lastRenderedRoundFrame: number;
 
   setGame(game: Game) {
     if (this.game) throw new Error('Renderer is already rendering a Game');
@@ -34,6 +39,8 @@ export default class Renderer {
     canvas.height = this.game.map.height;
     this.canvasContext = canvas.getContext('2d');
     this.canvasFactory = new CanvasFactory();
+    this.lastRenderedFrame = 0;
+    this.lastRenderedRoundFrame = 0;
     this.render = this.render.bind(this);
     this.render();
   }
@@ -44,6 +51,9 @@ export default class Renderer {
     this.drawFogOfWar();
     this.drawSoldiers();
     this.drawBullets();
+    this.playSounds();
+    this.lastRenderedFrame = this.game.frameNumber;
+    this.lastRenderedRoundFrame = this.game.roundFrameNumber;
     window.requestAnimationFrame(this.render);
   }
 
@@ -178,5 +188,18 @@ export default class Renderer {
     }
     ctx.stroke();
     ctx.fill();
+  }
+
+  private playSounds() {
+    this.game.soldiers.forEach((soldier) => {
+      if (this.lastRenderedRoundFrame <= soldier.weapon.lastShotFrame) {
+        const audio = new Audio(shotSoundUrl);
+        audio.play();
+      }
+      if (this.lastRenderedRoundFrame <= soldier.weapon.reloadStartFrame) {
+        const audio = new Audio(reloadSoundUrl);
+        audio.play();
+      }
+    });
   }
 }

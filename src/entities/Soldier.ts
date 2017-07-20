@@ -15,7 +15,6 @@ interface FrameAction {
 
 class Weapon {
   firing: boolean;
-  lastBulletFrame: number;
   nextShotFrame: number;
   readonly bulletCooldown: number;
   readonly magazineCapacity: number;
@@ -28,6 +27,14 @@ class Weapon {
     this.magazineCapacity = 16;
     this.reloadTime = 224;  // 1.75 * tickrate
     this.reset();
+  }
+
+  get lastShotFrame() {
+    return this.nextShotFrame - this.bulletCooldown;
+  }
+
+  get reloadStartFrame() {
+    return this.reloadEndingFrame - this.reloadTime;
   }
 
   setFiring(value: boolean) {
