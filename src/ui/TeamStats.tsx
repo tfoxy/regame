@@ -22,7 +22,7 @@ export default class TeamStats extends Component<Props, object> {
   render() {
     const team = this.props.team;
     return (
-      <span class="TeamStats" style={{ color: team.color }}>
+      <span class="TeamStats">
         { team.kills }/{ team.deaths }
       </span>
     );

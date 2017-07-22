@@ -108,7 +108,7 @@ export default class LocalControls {
     if (type === 'mousemove') {
       this.team.actionsQueue.delayAction({
         name: 'setFocusPoint',
-        args: [mouseEvent.offsetX, mouseEvent.offsetY],
+        args: [mouseEvent.layerX, mouseEvent.layerY],
       });
     } else if (type === 'mousedown') {
       this.team.actionsQueue.delayAction({

@@ -33,6 +33,7 @@ export default class Game {
   restartRoundFlag: boolean;
   round: number;
   roundFrameNumber: number;
+  maxRoundFrames: number;
 
   constructor() {
     this.map = new GameMap();
@@ -44,6 +45,7 @@ export default class Game {
     this.teams = [];
     this.events = new EventEmitter2();
     this.restartRoundFlag = false;
+    this.maxRoundFrames = this.tickrate * 20;
   }
 
   start() {
@@ -68,6 +70,7 @@ export default class Game {
   }
 
   private startRound() {
+    this.restartRoundFlag = false;
     this.teams.forEach((team) => {
       team.activeSoldiers.forEach((soldier) => {
         soldier.setFiring(false);
@@ -119,8 +122,7 @@ export default class Game {
       this.bullets.forEach(this.loopBullet, this);
       this.frameNumber += 1;
       this.roundFrameNumber += 1;
-      if (this.restartRoundFlag) {
-        this.restartRoundFlag = false;
+      if (this.restartRoundFlag || this.roundFrameNumber >= this.maxRoundFrames) {
         this.startRound();
       }
     }
