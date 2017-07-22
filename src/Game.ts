@@ -200,6 +200,7 @@ export default class Game {
   }
 
   private makeShot(soldier: Soldier) {
+    soldier.weapon.startManualReload(this.roundFrameNumber);
     soldier.weapon.finishReload(this.roundFrameNumber);
     if (!soldier.weapon.shoot(this.roundFrameNumber)) return;
     const bullet = new Bullet();

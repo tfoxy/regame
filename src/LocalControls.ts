@@ -47,6 +47,7 @@ const DEFAULT_KEY_BINDINGS = {
   BACKWARD: 's',
   LEFT: 'a',
   RIGHT: 'd',
+  RELOAD: 'r',
 };
 
 export default class LocalControls {
@@ -55,6 +56,7 @@ export default class LocalControls {
     BACKWARD,
     LEFT,
     RIGHT,
+    RELOAD,
   };
   team: Team;
   currentKeys: string[];
@@ -129,6 +131,7 @@ export default class LocalControls {
       BACKWARD: backwardKey,
       LEFT: leftKey,
       RIGHT: rightKey,
+      RELOAD: reloadKey,
     } = this.keyBindings;
     let moveX = 'X';
     let moveY = 'X';
@@ -139,6 +142,10 @@ export default class LocalControls {
         case backwardKey: moveY = 'S'; break;
         case leftKey: moveX = 'W'; break;
         case rightKey: moveX = 'E'; break;
+        case reloadKey: this.team.actionsQueue.delayAction({
+          name: 'reloadWeapon',
+          args: null,
+        });
       }
     });
     const direction = MOVE_MAP[moveY + moveX];

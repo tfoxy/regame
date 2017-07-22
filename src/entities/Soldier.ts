@@ -11,6 +11,7 @@ interface FrameAction {
   movementDirection: Vector;
   focusPoint: Vector;
   firing: boolean;
+  reload: boolean;
 }
 
 class Weapon {
@@ -21,6 +22,8 @@ class Weapon {
   magazineRounds: number;
   reloadEndingFrame: number;
   readonly reloadTime: number;
+  manualReloadStarted: boolean;
+  private fireOnNextFrame: boolean;
 
   constructor() {
     this.bulletCooldown = 8;  // tickrate / 16
@@ -37,8 +40,28 @@ class Weapon {
     return this.reloadEndingFrame - this.reloadTime;
   }
 
+  isReloading(frameNumber: number) {
+    return frameNumber < this.reloadEndingFrame;
+  }
+
   setFiring(value: boolean) {
     this.firing = value;
+    if (value) {
+      this.fireOnNextFrame = true;
+    }
+  }
+
+  startManualReload(frameNumber: number) {
+    if (this.manualReloadStarted) {
+      this.manualReloadStarted = false;
+      if (!this.isReloading(frameNumber)) {
+        this.startReload(frameNumber);
+      }
+    }
+  }
+
+  startReload(frameNumber: number) {
+    this.reloadEndingFrame = frameNumber + this.reloadTime;
   }
 
   finishReload(frameNumber: number) {
@@ -48,20 +71,31 @@ class Weapon {
   }
 
   shoot(frameNumber: number): boolean {
-    if (frameNumber < this.reloadEndingFrame) return false;
+    if (this.isReloading(frameNumber)) return false;
     if (this.magazineRounds <= 0) return false;
     if (frameNumber < this.nextShotFrame) return false;
-    if (!this.firing) return false;
+    if (!this.fireOnNextFrame) return false;
     this.nextShotFrame = frameNumber + this.bulletCooldown;
     this.magazineRounds -= 1;
     if (this.magazineRounds <= 0) {
-      this.reloadEndingFrame = frameNumber + this.reloadTime;
+      this.startReload(frameNumber);
+    }
+    if (!this.firing) {
+      this.fireOnNextFrame = false;
     }
     return true;
   }
 
+  manualReload() {
+    if (this.magazineRounds < this.magazineCapacity) {
+      this.manualReloadStarted = true;
+    }
+  }
+
   reset() {
     this.firing = false;
+    this.fireOnNextFrame = false;
+    this.manualReloadStarted = false;
     this.nextShotFrame = 0;
     this.magazineRounds = this.magazineCapacity;
     this.reloadEndingFrame = 0;
@@ -117,6 +151,7 @@ export default class Soldier extends Entity {
       movementDirection: { x: this.movementDirection.x, y: this.movementDirection.y },
       focusPoint: { x: this.focusPoint.x, y: this.focusPoint.y },
       firing: this.weapon.firing,
+      reload: this.weapon.manualReloadStarted,
     });
   }
 
@@ -126,6 +161,7 @@ export default class Soldier extends Entity {
       this.setMovementDirection(action.movementDirection.x, action.movementDirection.y);
       this.setFocusPoint(action.focusPoint.x, action.focusPoint.y);
       this.setFiring(action.firing);
+      if (action.reload) this.reloadWeapon();
     }
   }
 
@@ -159,6 +195,10 @@ export default class Soldier extends Entity {
   setFiring(value: boolean) {
     this.weapon.setFiring(value);
     this.saveAction();
+  }
+
+  reloadWeapon() {
+    this.weapon.manualReload();
   }
 
   setTeam(team: Team) {
