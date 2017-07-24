@@ -64,6 +64,7 @@ export default class Renderer {
     this.drawFogOfWar();
     this.drawSoldiers();
     this.drawBullets();
+    this.drawCrosshair();
     this.playSounds();
     this.lastRenderedFrame = this.game.frameNumber;
     this.lastRenderedRoundFrame = this.game.roundFrameNumber;
@@ -201,6 +202,18 @@ export default class Renderer {
     }
     ctx.stroke();
     ctx.fill();
+  }
+
+  private drawCrosshair() {
+    const point = this.povTeam.player.focusPoint;
+    const canvas = this.canvasFactory.getCrosshair();
+    const ctx = this.canvasContext;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(
+      canvas,
+      point.x - (canvas.width / 2),
+      point.y - (canvas.height / 2),
+    );
   }
 
   private playSounds() {

@@ -6,6 +6,7 @@ export default class CanvasFactory {
   private bulletCanvas: HTMLCanvasElement;
   private gameMapCanvas: HTMLCanvasElement;
   private soldierCanvasMap: Map<string, HTMLCanvasElement>;
+  private crosshairCanvas: HTMLCanvasElement;
 
   constructor() {
     this.soldierCanvasMap = new Map();
@@ -76,6 +77,27 @@ export default class CanvasFactory {
       ctx.lineWidth = 3;
       ctx.stroke();
       this.soldierCanvasMap.set(hash, canvas);
+    }
+    return canvas;
+  }
+
+  getCrosshair() {
+    let canvas = this.crosshairCanvas;
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.height = 15;
+      canvas.width = 15;
+      const ctx = canvas.getContext('2d');
+      ctx.beginPath();
+      ctx.moveTo(7, 0);
+      ctx.lineTo(7, 14);
+      ctx.moveTo(0, 7);
+      ctx.lineTo(14, 7);
+      ctx.strokeStyle = 'green';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      this.crosshairCanvas = canvas;
+      console.dir(canvas);
     }
     return canvas;
   }

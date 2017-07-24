@@ -136,6 +136,7 @@ export default class Soldier extends Entity {
 
   private setAngleByFocusPoint() {
     if (Number.isNaN(this.focusPoint.x)) return;
+    if (this.position.x === this.focusPoint.x && this.position.y === this.focusPoint.y) return;
     const angle = angleBetweenTwoVectors(this.position, this.focusPoint);
     this.setAngle(angle);
   }
@@ -173,10 +174,17 @@ export default class Soldier extends Entity {
   }
 
   setPosition(x: number, y: number) {
+    const { x: prevX, y: prevY } = this.position;
     super.setPosition(x, y);
     this.sat.pos.x = x;
     this.sat.pos.y = y;
-    this.setAngleByFocusPoint();
+    if (Number.isNaN(this.focusPoint.x)) {
+      this.focusPoint.x = x;
+      this.focusPoint.y = y;
+    } else {
+      this.focusPoint.x += x - prevX;
+      this.focusPoint.y += y - prevY;
+    }
     this.fovUpdatePending = true;
   }
 
@@ -190,6 +198,10 @@ export default class Soldier extends Entity {
     this.focusPoint.y = y;
     this.setAngleByFocusPoint();
     this.saveAction();
+  }
+
+  moveFocusPoint(x: number, y: number) {
+    this.setFocusPoint(this.focusPoint.x + x, this.focusPoint.y + y);
   }
 
   setFiring(value: boolean) {

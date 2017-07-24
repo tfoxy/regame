@@ -37,7 +37,6 @@ export default class MainUi extends Component<object, State> {
     if (Number.isNaN(connectionManager.localTeamIndex)) throw Error('connectionManager Error');
     const localTeam = game.teams[connectionManager.localTeamIndex];
     localControls.setTeam(localTeam);
-    localControls.setConnectionManager(connectionManager);
     const remoteTeam = game.teams[connectionManager.remoteTeamIndex];
     const remoteControls = new RemoteControls(connectionManager);
     remoteControls.setTeam(remoteTeam);

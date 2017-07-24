@@ -1,6 +1,5 @@
 /* global window */
 import Team from './Team';
-import ConnectionManager from './ConnectionManager';
 import {
   NULL_VECTOR,
 } from './vectors';
@@ -62,7 +61,7 @@ export default class LocalControls {
   currentKeys: string[];
   currentKeySet: Set<string>;
   currentDirection: string;
-  connectionManager: ConnectionManager;
+  trackedElement: Element;
 
   constructor(keyBindings = DEFAULT_KEY_BINDINGS) {
     this.keyBindings = keyBindings;
@@ -83,11 +82,8 @@ export default class LocalControls {
     this.team = team;
   }
 
-  setConnectionManager(connectionManager: ConnectionManager) {
-    this.connectionManager = connectionManager;
-  }
-
   setMouseTrackerElement(element: Element) {
+    this.trackedElement = element;
     element.addEventListener('mousemove', this.mouseListener);
     element.addEventListener('mousedown', this.mouseListener);
     element.addEventListener('mouseup', this.mouseListener);
@@ -108,11 +104,21 @@ export default class LocalControls {
   private mouseListener(mouseEvent: MouseEvent) {
     const type = mouseEvent.type;
     if (type === 'mousemove') {
-      this.team.actionsQueue.delayAction({
-        name: 'setFocusPoint',
-        args: [mouseEvent.layerX, mouseEvent.layerY],
-      });
+      if (document.pointerLockElement === this.trackedElement) {
+        this.team.actionsQueue.delayAction({
+          name: 'moveFocusPoint',
+          args: [mouseEvent.movementX, mouseEvent.movementY],
+        });
+      } else {
+        this.team.actionsQueue.delayAction({
+          name: 'setFocusPoint',
+          args: [mouseEvent.layerX, mouseEvent.layerY],
+        });
+      }
     } else if (type === 'mousedown') {
+      if (document.pointerLockElement !== this.trackedElement) {
+        this.trackedElement.requestPointerLock();
+      }
       this.team.actionsQueue.delayAction({
         name: 'setFiring',
         args: [true],
