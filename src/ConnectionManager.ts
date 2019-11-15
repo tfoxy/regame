@@ -8,10 +8,12 @@ export default class ConnectionManager {
   pc: RTCPeerConnection;
   dc: RTCDataChannel;
   events: EventEmitter2;
+  teamIndex: number;
 
   constructor() {
     this.pc = new RTCPeerConnection(configuration);
     this.events = new EventEmitter2();
+    this.teamIndex = NaN;
     this.pc.ondatachannel = (event: RTCDataChannelEvent) => {
       this.dc = event.channel;
       this.dcInit();
@@ -22,17 +24,21 @@ export default class ConnectionManager {
   }
 
   get localTeamIndex() {
-    const state = this.pc.iceConnectionState;
-    if (state === 'completed') return 0;
-    if (state === 'connected') return 1;
-    return NaN;
+    return this.teamIndex;
+    // const state = this.pc.iceConnectionState;
+    // if (state === 'completed') return 0;
+    // if (state === 'connected') return 1;
+    // return NaN;
   }
 
   get remoteTeamIndex() {
-    const state = this.pc.iceConnectionState;
-    if (state === 'completed') return 1;
-    if (state === 'connected') return 0;
+    if (this.teamIndex === 0) return 1;
+    if (this.teamIndex === 1) return 0;
     return NaN;
+    // const state = this.pc.iceConnectionState;
+    // if (state === 'completed') return 1;
+    // if (state === 'connected') return 0;
+    // return NaN;
   }
 
   get localDescription() {
@@ -40,6 +46,7 @@ export default class ConnectionManager {
   }
 
   async createOffer() {
+    this.teamIndex = 0;
     this.dc = this.pc.createDataChannel('gameData');
     this.dcInit();
     const sd = await this.pc.createOffer();
@@ -52,6 +59,7 @@ export default class ConnectionManager {
   }
 
   async createAnswer() {
+    this.teamIndex = 1;
     const sd = await this.pc.createAnswer();
     await this.pc.setLocalDescription(sd);
     return sd;
